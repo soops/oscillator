@@ -1,0 +1,160 @@
+<head>
+	<title>Simple Online Oscillator</title>
+</head>
+<body>
+	<div>
+		<span>Simple Online Oscillator</span>
+		<br>
+		<button id="start">Start</button>&nbsp;<button disabled id="stop">Stop</button>
+		<br><br>
+		<label for="frequency">Frequency (Hz)</label><br>
+		<input disabled id="frequency" type="range">&nbsp;<span id="freq-display"></span>
+		<br><br>
+		<label for="gain">Gain</label><br>
+		<input disabled id="gain" type="range">&nbsp;<span id="gain-display"></span><br>
+		<button disabled id="muter" onclick="toggleMute()">Mute</button>
+		<br><br>
+		<label for="detune">Detune (Cents)</label><br>
+		<input disabled id="detune" type="range">&nbsp;<span id="detune-display"></span>
+		<br><br>
+		<label for="type">Type</label><br>
+		<select disabled id="type">
+		  	<option value="sine">Sine</option>
+		  	<option value="square">Square</option>
+		  	<option value="sawtooth">Sawtooth</option>
+		  	<option value="triange">Triangle</option>
+		</select>
+	</div>
+
+	<script>
+	document.getElementById("start").addEventListener("click", function() {
+		var gainSlider = document.getElementById("gain")
+		var detuneSlider = document.getElementById("detune")
+		var freqSlider = document.getElementById("frequency")
+		var typeDropdown = document.getElementById("type")
+
+		var gainDisplay = document.getElementById("gain-display")
+		var detuneDisplay = document.getElementById("detune-display")
+		var freqDisplay = document.getElementById("freq-display")
+
+		gainSlider.min = 0
+		gainSlider.max = 1
+		gainSlider.step = 0.1
+		gainSlider.disabled = false
+		gainSlider.value = 1
+
+		detuneSlider.min = 0
+		detuneSlider.max = 1200
+		detuneSlider.step = 100
+		detuneSlider.disabled = false
+		detuneSlider.value = 0
+
+		freqSlider.min = 0
+		freqSlider.max = 2000
+		freqSlider.step = 100
+		freqSlider.disabled = false
+		freqSlider.value = 100
+
+		typeDropdown.disabled = false
+		document.getElementById("start").disabled = true
+		document.getElementById("stop").disabled = false
+		document.getElementById("muter").disabled = false
+
+		window.context = new webkitAudioContext()
+		window.gain = window.context.createGain()
+		window.gain.connect(window.context.destination)
+		window.osc = window.context.createOscillator()
+		window.osc.connect(window.gain)
+		window.osc.start(0)
+		
+		window.onInterval = window.setInterval(function() {
+			detuneDisplay.innerHTML = detuneSlider.value
+			freqDisplay.innerHTML = freqSlider.value
+			gainDisplay.innerHTML = gainSlider.value
+
+			window.gain.gain.value = gainSlider.value
+			window.osc.frequency.value = freqSlider.value
+			window.osc.type = typeDropdown.value.toLowerCase()
+			window.osc.detune.value = detuneSlider.value
+		}, 10)
+	})
+
+	document.getElementById("stop").addEventListener("click", function() {
+		var gainSlider = document.getElementById("gain")
+		var detuneSlider = document.getElementById("detune")
+		var freqSlider = document.getElementById("frequency")
+		var typeDropdown = document.getElementById("type")
+
+		var gainDisplay = document.getElementById("gain-display")
+		var detuneDisplay = document.getElementById("detune-display")
+		var freqDisplay = document.getElementById("freq-display")
+
+		gainDisplay.innerHTML = ""
+		detuneDisplay.innerHTML = ""
+		freqDisplay.innerHTML = ""
+
+		detuneSlider.value = detuneSlider.defaultValue
+		freqSlider.value = freqSlider.defaultValue
+		gainSlider.value = gainSlider.defaultValue
+		typeDropdown.value = "sine"
+
+		gainSlider.disabled = true
+		detuneSlider.disabled = true
+		freqSlider.disabled = true
+		typeDropdown.disabled = true
+		document.getElementById("stop").disabled = true
+		document.getElementById("muter").disabled = true
+		document.getElementById("start").disabled = false
+
+		window.gain.disconnect(window.context.destination)
+		window.osc.disconnect(window.gain)
+		window.osc.stop(0)
+		
+		window.clearInterval(window.onInterval)
+	})
+
+	document.body.addEventListener("keypress", function(e) {
+		if(document.getElementById("stop").disabled !== true) {
+			var gainSlider = document.getElementById("gain")
+			var detuneSlider = document.getElementById("detune")
+			var freqSlider = document.getElementById("frequency")
+
+			switch(e.key) {
+				case "q":
+					freqSlider.stepDown()
+					break
+				case "w":
+					freqSlider.stepUp()
+					break
+				case "a":
+					gainSlider.stepDown()
+					break
+				case "s":
+					gainSlider.stepUp()
+					break
+				case "z":
+					detuneSlider.stepDown()
+					break
+				case "x":
+					detuneSlider.stepUp()
+					break
+				case "m":
+					toggleMute()
+					break
+			}
+		}
+	})
+
+	function toggleMute() {
+		var gainSlider = document.getElementById("gain")
+		if (gainSlider.value > 0) {
+			window.storedGain = gainSlider.value
+			gainSlider.value = 0
+			document.getElementById("muter").innerHTML = "Unmute"
+		} else if (gainSlider.value == 0) {
+			gainSlider.value = window.storedGain
+			document.getElementById("muter").innerHTML = "Mute"
+		}
+	}
+	</script>
+</body>
