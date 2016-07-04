@@ -3,26 +3,27 @@
 </head>
 <body>
 	<div>
-		<span>Simple Online Oscillator</span>
+		<span>Simple Online Oscillator by <a href="http://soops.github.io">Ethan Arterberry</a></span><br>
+		<span><b>Tip:</b> Hover over the labels for each dial to see the keyboard shortcuts that correspond to it.</span>
 		<br>
 		<button id="start">Start</button>&nbsp;<button disabled id="stop">Stop</button>
 		<br><br>
-		<label for="frequency">Frequency (Hz)</label><br>
+		<label title="Press 'Q' to decrease and press 'W' to increase." for="frequency"><u>Frequency (Hz)</u></label><br>
 		<input disabled id="frequency" type="range">&nbsp;<span id="freq-display"></span>
 		<br><br>
-		<label for="gain">Gain</label><br>
+		<label title="Press 'A' to decrease and press 'S' to increase." for="gain"><u>Gain</u></label><br>
 		<input disabled id="gain" type="range">&nbsp;<span id="gain-display"></span><br>
-		<button disabled id="muter" onclick="toggleMute()">Mute</button>
+		<button title="Press 'M' to toggle." disabled id="muter" onclick="toggleMute()">Mute</button>
 		<br><br>
-		<label for="detune">Detune (Cents)</label><br>
+		<label title="Press 'Z' to decrease and press 'X' to increase." for="detune"><u>Detune (Cents)</u></label><br>
 		<input disabled id="detune" type="range">&nbsp;<span id="detune-display"></span>
 		<br><br>
-		<label for="type">Type</label><br>
+		<label for="type"><u>Type</u></label><br>
 		<select disabled id="type">
 		  	<option value="sine">Sine</option>
 		  	<option value="square">Square</option>
 		  	<option value="sawtooth">Sawtooth</option>
-		  	<option value="triange">Triangle</option>
+		  	<option value="triangle">Triangle</option>
 		</select>
 	</div>
 
@@ -60,7 +61,7 @@
 		document.getElementById("stop").disabled = false
 		document.getElementById("muter").disabled = false
 
-		window.context = new webkitAudioContext()
+		window.context = new (webkitAudioContext || AudioContext)()
 		window.gain = window.context.createGain()
 		window.gain.connect(window.context.destination)
 		window.osc = window.context.createOscillator()
@@ -71,6 +72,15 @@
 			detuneDisplay.innerHTML = detuneSlider.value
 			freqDisplay.innerHTML = freqSlider.value
 			gainDisplay.innerHTML = gainSlider.value
+
+			if (gainSlider.value > 0) {
+				document.getElementById("muter").innerHTML = "Mute"
+				document.getElementById("muter").disabled = false
+			} 
+
+			if (gainSlider.value <= 0 && document.getElementById("muter").innerText === "Mute") {
+				document.getElementById("muter").disabled = true
+			}
 
 			window.gain.gain.value = gainSlider.value
 			window.osc.frequency.value = freqSlider.value
